@@ -1,4 +1,4 @@
-const defaultSettings = {
+﻿const defaultSettings = {
   showOrbs: true,
   glassPlayer: true,
   autoplayNext: true,
@@ -72,7 +72,7 @@ const themePresets = {
   },
 };
 
-const SETTINGS_API = "http://127.0.0.1:8001/api/settings";
+const SETTINGS_API = `${window.FLOW_API_BASE || "http://127.0.0.1:8001"}/api/settings`;
 let settingsApiAvailable = false;
 
 function clamp(value, min, max) {

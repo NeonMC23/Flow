@@ -1,11 +1,30 @@
 {
-  "updatedAt": 1775484797663,
+  "updatedAt": 1780407988391,
   "favorites": [],
   "queue": [],
-  "recent": [],
-  "lastTrack": "",
-  "lastTime": 36.11,
-  "playlist": "recent",
+  "recent": [
+    "src/data/album/bttg/backtotheground.mp3",
+    "src/data/album/trav/epic-sax.wav",
+    "src/data/album/bttg/experience-vocals.wav",
+    "src/data/album/bttg/experience.wav",
+    "src/data/album/poster_boy/poster_boy.m4a",
+    "src/data/album/trav/nonobyseathesea.mp3",
+    "src/data/album/bttg/is-this-love-120bpm-2p.wav",
+    "src/data/album/fever/stream-buckshot-fakemink-fever-prod-made-with-voicemod.mp3",
+    "src/data/album/poster_boy/musics/poster_boy.m4a",
+    "src/data/album/test/musics/BackToTheGround.mp3",
+    "src/data/album/a/(Audio)%20Enregistrement%20de%20l'%C3%A9cran%202026-03-30%20234543.m4a",
+    "src/data/album/z/Disco%2520con%2520Tutti.mp3",
+    "src/data/album/a/Disco%2520con%2520Tutti.mp3",
+    "src/data/album/a/Disco%20con%20Tutti.mp3",
+    "src/data/album/kirk/Disco%20con%20Tutti.mp3",
+    "src/data/album/kirk/(Audio) Enregistrement de l'Ã©cran 2026-03-30 234543.m4a",
+    "src/data/album/nevermind/Disco%20con%20Tutti.mp3",
+    "src/data/album/nevermind/(Audio) Enregistrement de l'Ã©cran 2026-03-30 234543.m4a"
+  ],
+  "lastTrack": "src/data/album/bttg/backtotheground.mp3",
+  "lastTime": 1.03,
+  "playlist": "all",
   "sort": {
     "key": "title",
     "dir": "asc"
@@ -15,5 +34,5 @@
     "album": "",
     "search": ""
   },
-  "volume": 1
+  "volume": 0.24
 }

@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Flow - Modern Music Player</title>
-    <link rel="stylesheet" href="src/css/style.css" />
+    <link rel="stylesheet" href="src/css/style.css?v=lyrics-fix-2" />
     <link rel="icon" href="src/icon/logo.png" />
   </head>
 
@@ -158,9 +158,42 @@
       </main>
     </div>
 
+
+    <div id="lyrics-modal" class="lyrics-modal hidden" aria-hidden="true">
+      <div class="lyrics-backdrop" data-lyrics-close></div>
+      <div class="lyrics-panel" role="dialog" aria-modal="true">
+        <div class="lyrics-head">
+          <div class="lyrics-title">
+            <h3 id="lyrics-track">Lyrics</h3>
+            <p id="lyrics-sub">Sync to the current track.</p>
+          </div>
+          <div class="lyrics-actions">
+            <button id="lyrics-edit" class="control-btn" type="button">Edit</button>
+            <button class="ghost-btn" type="button" data-lyrics-close>Close</button>
+          </div>
+        </div>
+
+        <div class="lyrics-body">
+          <div id="lyrics-view" class="lyrics-view"></div>
+
+          <div id="lyrics-editor" class="lyrics-editor hidden">
+            <div class="lyrics-editor-toolbar">
+              <button id="lyrics-add" class="control-btn" type="button">Add line</button>
+              <div class="lyrics-editor-actions">
+                <button id="lyrics-cancel" class="ghost-btn" type="button">Cancel</button>
+                <button id="lyrics-save" class="control-btn primary" type="button">Save</button>
+              </div>
+            </div>
+            <div id="lyrics-error" class="lyrics-error hidden"></div>
+            <div id="lyrics-rows" class="lyrics-rows"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="src/javascript/runtime_config.js"></script>
     <script src="src/javascript/state.js"></script>
     <script src="src/javascript/settings.js"></script>
-    <script src="src/javascript/filter.js"></script>
+    <script src="src/javascript/filter.js?v=lyrics-fix-2"></script>
     <script src="src/javascript/script.js"></script>
     <script src="src/javascript/effect.js"></script>
   </body>

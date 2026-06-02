@@ -1,4 +1,4 @@
-function toggleFilterMenu() {
+﻿function toggleFilterMenu() {
   const menu = document.getElementById("filterMenu");
   if (menu) {
     menu.classList.toggle("show");
@@ -72,7 +72,21 @@ let storedVolume = parseFloat(localStorage.getItem("flow-volume") || "1");
 let stateUpdatedAt = parseInt(localStorage.getItem("flow-state-updated") || "0", 10);
 let stateSyncTimer = null;
 let stateApiAvailable = false;
-const STATE_API = "http://127.0.0.1:8001/api/state";
+const STATE_API = `${window.FLOW_API_BASE || "http://127.0.0.1:8001"}/api/state`;
+function handleLyricsButtonClick(e) {
+  const button = e.target.closest ? e.target.closest(".lyrics-btn") : null;
+  if (!button) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  const row = button.closest(".track-row");
+  const src = row ? row.dataset.src : "";
+  const track = currentTracks.find((item) => item.src === src) || musicData.find((item) => item.src === src);
+  if (track) openLyricsModal(track);
+}
+
+document.addEventListener("click", handleLyricsButtonClick);
 
 if (storedSort && storedSort.key && storedSort.dir) {
   currentSort = storedSort;
@@ -584,6 +598,7 @@ function renderTracks(tracks) {
           isFavorite ? "Fav" : "Fav"
         }</button>
         <button class="queue-add" type="button">Queue</button>
+        <button class="lyrics-btn" type="button">Lyrics</button>
       </div>
       <div class="cell artist">${track.artist}</div>
       <div class="cell album">${track.album}</div>
@@ -605,6 +620,11 @@ function renderTracks(tracks) {
     li.querySelector(".queue-add").addEventListener("click", (e) => {
       e.stopPropagation();
       addToQueue(track);
+    });
+
+    li.querySelector(".lyrics-btn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      openLyricsModal(track);
     });
 
     li.dataset.src = track.src;
@@ -943,3 +963,291 @@ window.addEventListener("resize", () => {
 window.addEventListener("load", () => {
   scheduleMarqueeUpdate();
 });
+
+const LYRICS_API_BASE = window.FLOW_API_BASE || "http://127.0.0.1:8001";
+let lyricsModalRaf = null;
+let lyricsCurrent = null;
+
+function openLyricsModal(track) {
+  const modal = document.getElementById("lyrics-modal");
+  if (!modal) return;
+
+  lyricsCurrent = track;
+  modal.classList.remove("hidden");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+
+  const titleEl = document.getElementById("lyrics-track");
+  const subEl = document.getElementById("lyrics-sub");
+  if (titleEl) titleEl.textContent = track.title;
+  if (subEl) subEl.textContent = `${track.artist} • ${track.album}`;
+
+  setLyricsEditMode(false);
+  loadAndRenderLyrics();
+  startLyricsSync();
+}
+
+function closeLyricsModal() {
+  const modal = document.getElementById("lyrics-modal");
+  if (!modal) return;
+  modal.classList.add("hidden");
+  modal.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+  stopLyricsSync();
+}
+
+function stopLyricsSync() {
+  if (lyricsModalRaf) cancelAnimationFrame(lyricsModalRaf);
+  lyricsModalRaf = null;
+}
+
+function startLyricsSync() {
+  stopLyricsSync();
+  const audio = document.getElementById("audio");
+  if (!audio) return;
+
+  const tick = () => {
+    const view = document.getElementById("lyrics-view");
+    if (!view || view.classList.contains("hidden")) {
+      lyricsModalRaf = requestAnimationFrame(tick);
+      return;
+    }
+
+    const t = audio.currentTime || 0;
+    const lines = Array.from(view.querySelectorAll(".lyrics-line"));
+    let activeEl = null;
+    for (const el of lines) {
+      const start = parseFloat(el.dataset.start || "0");
+      const dur = parseFloat(el.dataset.duration || "0");
+      if (t >= start && t < start + dur) {
+        activeEl = el;
+        break;
+      }
+    }
+
+    let changed = false;
+    lines.forEach((el) => {
+      const next = el === activeEl;
+      if (next !== el.classList.contains("active")) changed = true;
+      el.classList.toggle("active", next);
+    });
+
+    if (activeEl && changed) {
+      activeEl.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+
+    lyricsModalRaf = requestAnimationFrame(tick);
+  };
+
+  lyricsModalRaf = requestAnimationFrame(tick);
+}
+
+async function loadAndRenderLyrics() {
+  const view = document.getElementById("lyrics-view");
+  const editBtn = document.getElementById("lyrics-edit");
+  if (!view || !lyricsCurrent) return;
+
+  if (!lyricsCurrent.folder || !lyricsCurrent.file) {
+    view.innerHTML = '<div class="lyrics-empty">Impossible d\'identifier ce morceau (metadata manquantes).</div>';
+    if (editBtn) editBtn.disabled = true;
+    return;
+  }
+
+  if (editBtn) editBtn.disabled = false;
+
+  try {
+    const url = `${LYRICS_API_BASE}/api/lyrics?folder=${encodeURIComponent(
+      lyricsCurrent.folder
+    )}&file=${encodeURIComponent(lyricsCurrent.file)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const lyrics = Array.isArray(data.lyrics) ? data.lyrics : [];
+    renderLyricsView(lyrics);
+    renderLyricsEditor(lyrics);
+  } catch (err) {
+    view.innerHTML = '<div class="lyrics-empty">Serveur upload hors ligne. Lance: python start.py</div>';
+  }
+}
+
+function renderLyricsView(lyrics) {
+  const view = document.getElementById("lyrics-view");
+  if (!view) return;
+
+  if (!lyrics || lyrics.length === 0) {
+    view.innerHTML = '<div class="lyrics-empty">Aucune parole disponible. Ajoutez-en !</div>';
+    return;
+  }
+
+  view.innerHTML = "";
+  lyrics.forEach((line) => {
+    const div = document.createElement("div");
+    div.className = "lyrics-line";
+    div.dataset.start = String(line.start ?? 0);
+    div.dataset.duration = String(line.duration ?? 0);
+    div.textContent = line.text || "";
+    view.appendChild(div);
+  });
+}
+
+function renderLyricsEditor(lyrics) {
+  const rows = document.getElementById("lyrics-rows");
+  if (!rows) return;
+  rows.innerHTML = "";
+
+  const list = Array.isArray(lyrics) ? lyrics : [];
+  list.forEach((line) => addLyricsRow(line.text, line.start, line.duration));
+}
+
+function addLyricsRow(text = "", start = 0, duration = 0) {
+  const rows = document.getElementById("lyrics-rows");
+  if (!rows) return;
+
+  const row = document.createElement("div");
+  row.className = "lyrics-row";
+  row.innerHTML = `
+    <input type="text" placeholder="Text" value="${escapeHtml(text)}" />
+    <input type="number" step="0.1" min="0" placeholder="Start" value="${Number(start) || 0}" />
+    <input type="number" step="0.1" min="0" placeholder="Duration" value="${Number(duration) || 0}" />
+    <button class="lyrics-delete" type="button">Delete</button>
+  `;
+  row.querySelector(".lyrics-delete").addEventListener("click", () => row.remove());
+  rows.appendChild(row);
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function setLyricsEditMode(enabled) {
+  const view = document.getElementById("lyrics-view");
+  const editor = document.getElementById("lyrics-editor");
+  const btn = document.getElementById("lyrics-edit");
+  const error = document.getElementById("lyrics-error");
+
+  if (error) {
+    error.classList.add("hidden");
+    error.textContent = "";
+  }
+
+  if (enabled) {
+    if (view) view.classList.add("hidden");
+    if (editor) editor.classList.remove("hidden");
+    if (btn) btn.textContent = "View";
+  } else {
+    if (editor) editor.classList.add("hidden");
+    if (view) view.classList.remove("hidden");
+    if (btn) btn.textContent = "Edit";
+  }
+}
+
+function collectLyricsFromEditor() {
+  const rows = document.getElementById("lyrics-rows");
+  if (!rows) return [];
+
+  const result = [];
+  rows.querySelectorAll(".lyrics-row").forEach((row) => {
+    const inputs = row.querySelectorAll("input");
+    const text = (inputs[0]?.value || "").trim();
+    const start = parseFloat(inputs[1]?.value || "0");
+    const duration = parseFloat(inputs[2]?.value || "0");
+    result.push({ text, start: Math.max(0, start), duration: Math.max(0, duration) });
+  });
+
+  result.sort((a, b) => a.start - b.start);
+  return result.map((l) => ({
+    ...l,
+    start: Math.round(l.start * 10) / 10,
+    duration: Math.round(l.duration * 10) / 10,
+  }));
+}
+
+function validateLyrics(lyrics) {
+  for (let i = 0; i < lyrics.length - 1; i++) {
+    const end = lyrics[i].start + lyrics[i].duration;
+    if (end > lyrics[i + 1].start + 1e-6) {
+      return `Overlap between lines ${i + 1} and ${i + 2}.`;
+    }
+  }
+  return null;
+}
+
+async function saveLyrics() {
+  const error = document.getElementById("lyrics-error");
+  if (!lyricsCurrent?.folder || !lyricsCurrent?.file) return;
+
+  const lyrics = collectLyricsFromEditor();
+  const validation = validateLyrics(lyrics);
+  if (validation) {
+    if (error) {
+      error.textContent = validation;
+      error.classList.remove("hidden");
+    }
+    return;
+  }
+
+  try {
+    const res = await fetch(`${LYRICS_API_BASE}/api/lyrics`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ folder: lyricsCurrent.folder, file: lyricsCurrent.file, lyrics }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Save failed");
+    setLyricsEditMode(false);
+    loadAndRenderLyrics();
+  } catch (err) {
+    if (error) {
+      error.textContent = `Error: ${err.message}`;
+      error.classList.remove("hidden");
+    }
+  }
+}
+
+document.addEventListener("click", (e) => {
+  const target = e.target;
+  if (!target) return;
+  if (target.matches("[data-lyrics-close]") || target.closest("[data-lyrics-close]")) {
+    closeLyricsModal();
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    const modal = document.getElementById("lyrics-modal");
+    if (modal && !modal.classList.contains("hidden")) {
+      closeLyricsModal();
+    }
+  }
+});
+
+const lyricsEditBtn = document.getElementById("lyrics-edit");
+if (lyricsEditBtn) {
+  lyricsEditBtn.addEventListener("click", () => {
+    const editor = document.getElementById("lyrics-editor");
+    const enabled = editor && editor.classList.contains("hidden");
+    setLyricsEditMode(enabled);
+  });
+}
+
+const lyricsAddBtn = document.getElementById("lyrics-add");
+if (lyricsAddBtn) {
+  lyricsAddBtn.addEventListener("click", () => addLyricsRow("", 0, 0));
+}
+
+const lyricsCancelBtn = document.getElementById("lyrics-cancel");
+if (lyricsCancelBtn) {
+  lyricsCancelBtn.addEventListener("click", () => {
+    setLyricsEditMode(false);
+    loadAndRenderLyrics();
+  });
+}
+
+const lyricsSaveBtn = document.getElementById("lyrics-save");
+if (lyricsSaveBtn) {
+  lyricsSaveBtn.addEventListener("click", saveLyrics);
+}

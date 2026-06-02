@@ -1,0 +1,39 @@
+2026-05-27 15:20:24 [control-hub] Launching: C:\Users\piotr\AppData\Local\Programs\Python\Python312\pythonw.exe \\Nas-lseau\kids\02. Pierre\Documents\Code\Web\flow\start.py (port=5500)
+2026-05-27 15:20:24 [stdout] Web server running on http://127.0.0.1:5500 
+2026-05-27 15:20:24 [stdout] 
+2026-05-27 15:20:24 [stdout] Upload server running on http://127.0.0.1:8001 
+2026-05-27 15:20:24 [stdout] 
+2026-05-27 15:21:39 [control-hub] Stopping...
+2026-05-27 15:21:39 [control-hub] Process exited with code 1
+2026-05-27 15:21:40 [control-hub] Launching: C:\Users\piotr\AppData\Local\Programs\Python\Python312\pythonw.exe \\Nas-lseau\kids\02. Pierre\Documents\Code\Web\flow\start.py (port=5500)
+2026-05-27 15:21:40 [stdout] Web server running on http://127.0.0.1:5500 
+2026-05-27 15:21:40 [stdout] 
+2026-05-27 15:21:40 [stdout] Upload server running on http://127.0.0.1:8001 
+2026-05-27 15:21:40 [stdout] 
+2026-05-27 15:22:17 [control-hub] Stopping...
+2026-05-27 15:22:17 [control-hub] Process exited with code 1
+2026-05-27 15:22:34 [control-hub] Launching: C:\Users\piotr\AppData\Local\Programs\Python\Python312\pythonw.exe \\Nas-lseau\kids\02. Pierre\Documents\Code\Web\flow\start.py (port=5500)
+2026-05-27 15:22:34 [stdout] Web server running on http://127.0.0.1:5500 
+2026-05-27 15:22:34 [stdout] 
+2026-05-27 15:22:34 [stdout] Upload server running on http://127.0.0.1:8001 
+2026-05-27 15:22:34 [stdout] 
+2026-05-27 15:22:40 [control-hub] Stopping...
+2026-05-27 15:22:40 [control-hub] Process exited with code 1
+2026-05-27 15:23:15 [control-hub] Launching: C:\Users\piotr\AppData\Local\Programs\Python\Python312\pythonw.exe \\Nas-lseau\kids\02. Pierre\Documents\Code\Web\flow\start.py (port=5500)
+2026-05-27 15:23:15 [stdout] Web server running on http://127.0.0.1:5500 
+2026-05-27 15:23:15 [stdout] 
+2026-05-27 15:23:15 [stdout] Upload server running on http://127.0.0.1:8001 
+2026-05-27 15:23:15 [stdout] 
+2026-05-27 15:23:16 [stderr] 127.0.0.1 - - [27/May/2026 15:23:16] "GET /api/state HTTP/1.1" 200 -
+2026-05-27 15:23:16 [stderr] 127.0.0.1 - - [27/May/2026 15:23:16] "GET /api/settings HTTP/1.1" 200 -
+2026-05-27 15:23:16 [stderr] 127.0.0.1 - - [27/May/2026 15:23:16] "GET /src/data/album.json?v=1779888196335 HTTP/1.1" 200 -
+2026-05-27 15:23:16 [stderr] 127.0.0.1 - - [27/May/2026 15:23:16] "GET /src/data/settings.json HTTP/1.1" 200 -
+2026-05-27 15:23:16 [stderr] 127.0.0.1 - - [27/May/2026 15:23:16] "GET /src/data/album/poster_boy/infos.json?v=1779888196515 HTTP/1.1" 200 -
+2026-05-27 15:23:16 [stderr] 127.0.0.1 - - [27/May/2026 15:23:16] "GET /src/data/album/bttg/infos.json?v=1779888196561 HTTP/1.1" 200 -
+2026-05-27 15:23:16 [stderr] 127.0.0.1 - - [27/May/2026 15:23:16] "GET /src/data/album/trav/infos.json?v=1779888196586 HTTP/1.1" 200 -
+2026-05-27 15:23:16 [stderr] 127.0.0.1 - - [27/May/2026 15:23:16] "GET /src/data/album/fever/infos.json?v=1779888196639 HTTP/1.1" 200 -
+2026-05-27 15:23:16 [stderr] 127.0.0.1 - - [27/May/2026 15:23:16] "GET /src/data/album/bttg/backtotheground.mp3 HTTP/1.1" 200 -
+2026-05-27 15:23:17 [stderr] 127.0.0.1 - - [27/May/2026 15:23:17] "OPTIONS /api/state HTTP/1.1" 204 -
+2026-05-27 15:23:17 [stderr] 127.0.0.1 - - [27/May/2026 15:23:17] "POST /api/state HTTP/1.1" 200 -
+2026-05-27 15:24:03 [control-hub] Stopping...
+2026-05-27 15:24:03 [control-hub] Process exited with code 1

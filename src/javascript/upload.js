@@ -1,4 +1,4 @@
-const libraryTree = document.getElementById("library-tree");
+﻿const libraryTree = document.getElementById("library-tree");
 const libraryStatus = document.getElementById("library-status");
 const librarySearch = document.getElementById("library-search");
 const addArtistBtn = document.getElementById("add-artist");
@@ -27,7 +27,7 @@ const deleteTrackBtn = document.getElementById("delete-track");
 const addAlbumBtn = document.getElementById("add-album");
 const saveAlbumCoverBtn = document.getElementById("save-album-cover");
 
-const serverBase = "http://127.0.0.1:8001";
+const serverBase = window.FLOW_API_BASE || "http://127.0.0.1:8001";
 let libraryCache = [];
 let pendingFiles = [];
 let currentArtist = null;

@@ -1,0 +1,31 @@
+{
+  "title": "trav",
+  "artist": "idkwth",
+  "cover": "IMG-20251229-WA0002.jpg",
+  "tracks": [
+    {
+      "title": "Epic Sax",
+      "file": "epic-sax.wav",
+      "duration": "0:32",
+      "lyrics": [
+        {
+          "text": "empty lyrics",
+          "start": 0,
+          "duration": 32
+        }
+      ]
+    },
+    {
+      "title": "NonobySeaTheSea",
+      "file": "nonobyseathesea.mp3",
+      "duration": "2:43",
+      "lyrics": [
+        {
+          "text": "empty lyrics",
+          "start": 0,
+          "duration": 163
+        }
+      ]
+    }
+  ]
+}

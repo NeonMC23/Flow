@@ -51,6 +51,8 @@ async function loadAlbums() {
             duration: track.duration,
             cover,
             src: encodeURI(`src/data/album/${albumName}/${track.file}`),
+            folder: albumName,
+            file: track.file,
           });
         });
       } catch (err) {

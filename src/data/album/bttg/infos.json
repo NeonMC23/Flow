@@ -1,0 +1,55 @@
+{
+  "title": "bttg",
+  "artist": "idkwth",
+  "cover": "image-removebg-preview.png",
+  "tracks": [
+    {
+      "title": "experience-vocals",
+      "file": "experience-vocals.wav",
+      "duration": "0:24",
+      "lyrics": [
+        {
+          "text": "empty lyrics",
+          "start": 0,
+          "duration": 24
+        }
+      ]
+    },
+    {
+      "title": "experience",
+      "file": "experience.wav",
+      "duration": "0:24",
+      "lyrics": [
+        {
+          "text": "empty lyrics",
+          "start": 0,
+          "duration": 24
+        }
+      ]
+    },
+    {
+      "title": "BackToTheGround",
+      "file": "backtotheground.mp3",
+      "duration": "3:52",
+      "lyrics": [
+        {
+          "text": "empty lyrics",
+          "start": 0,
+          "duration": 232
+        }
+      ]
+    },
+    {
+      "title": "Is This Love",
+      "file": "is-this-love-120bpm-2p.wav",
+      "duration": "0:55",
+      "lyrics": [
+        {
+          "text": "empty lyrics",
+          "start": 0,
+          "duration": 55
+        }
+      ]
+    }
+  ]
+}

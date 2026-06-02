@@ -1,10 +1,10 @@
-import argparse
+﻿import argparse
 import json
 import re
-import argparse
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 import cgi
+from urllib.parse import urlparse, parse_qs
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "src" / "data" / "album"
@@ -87,13 +87,63 @@ def load_album_info(folder: str):
     return data
 
 
+
+def normalize_album_info(data: dict):
+    payload = {k: v for k, v in data.items() if k != "folder"}
+    tracks = payload.get("tracks")
+    if isinstance(tracks, list):
+        for track in tracks:
+            if not isinstance(track, dict):
+                continue
+            lyrics = track.get("lyrics")
+            if not isinstance(lyrics, list):
+                track["lyrics"] = default_lyrics_for_duration(track.get("duration", "0:00"))
+    return payload
+
+
 def save_album_info(folder: str, data: dict):
     info_path = DATA_DIR / folder / "infos.json"
     info_path.parent.mkdir(parents=True, exist_ok=True)
-    payload = {k: v for k, v in data.items() if k != "folder"}
+    payload = normalize_album_info(data)
     with info_path.open("w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False)
         f.write("\n")
+
+
+
+def parse_duration_seconds(value):
+    """Convert a duration value (seconds, m:ss, h:mm:ss) to seconds."""
+    if isinstance(value, (int, float)):
+        return max(0.0, float(value))
+    if not isinstance(value, str):
+        return 0.0
+
+    value = value.strip()
+    if not value:
+        return 0.0
+
+    try:
+        if ":" not in value:
+            return max(0.0, float(value))
+        parts = [float(part) for part in value.split(":")]
+    except ValueError:
+        return 0.0
+
+    seconds = 0.0
+    for part in parts:
+        seconds = seconds * 60 + part
+    return max(0.0, seconds)
+
+
+def default_lyrics_for_duration(duration):
+    seconds = round(parse_duration_seconds(duration), 1)
+    return [
+        {
+            "text": "empty lyrics",
+            "start": 0,
+            "duration": seconds,
+        }
+    ]
 
 
 def build_library():
@@ -149,6 +199,13 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps({"settings": load_settings_file()}).encode("utf-8"))
             return
 
+        parsed = urlparse(self.path)
+        if parsed.path == "/api/lyrics":
+            qs = parse_qs(parsed.query or "")
+            folder = (qs.get("folder") or [""])[0].strip()
+            filename = (qs.get("file") or [""])[0].strip()
+            self.handle_get_lyrics(folder, filename)
+            return
         self._set_headers(404)
         self.wfile.write(b"{\"error\":\"Not found\"}")
 
@@ -190,7 +247,9 @@ class Handler(BaseHTTPRequestHandler):
             if self.path == "/api/settings":
                 self.handle_settings()
                 return
-
+            if self.path == "/api/lyrics":
+                self.handle_set_lyrics()
+                return
             self._set_headers(404)
             self.wfile.write(b"{\"error\":\"Not found\"}")
         except Exception as exc:
@@ -549,7 +608,12 @@ class Handler(BaseHTTPRequestHandler):
                 f.write(item.file.read())
             duration = durations.get(original_name, "0:00")
             title = titles.get(original_name) or Path(original_name).stem
-            tracks.append({"title": title, "file": filename, "duration": duration})
+            tracks.append({
+                "title": title,
+                "file": filename,
+                "duration": duration,
+                "lyrics": default_lyrics_for_duration(duration),
+            })
 
         if mode == "append_album":
             existing = info.get("tracks", [])
@@ -576,6 +640,91 @@ class Handler(BaseHTTPRequestHandler):
         self._set_headers(200)
         self.wfile.write(json.dumps({"ok": True, "folder": folder}).encode("utf-8"))
 
+
+
+    def _validate_lyrics(self, lyrics):
+        if lyrics is None:
+            return []
+        if not isinstance(lyrics, list):
+            raise ValueError("lyrics must be a list")
+
+        cleaned = []
+        for item in lyrics:
+            if not isinstance(item, dict):
+                continue
+            text = str(item.get("text") or "").strip()
+            try:
+                start = float(item.get("start"))
+            except Exception:
+                start = 0.0
+            try:
+                duration = float(item.get("duration"))
+            except Exception:
+                duration = 0.0
+            start = max(0.0, start)
+            duration = max(0.0, duration)
+            cleaned.append({"text": text, "start": round(start, 1), "duration": round(duration, 1)})
+
+        cleaned.sort(key=lambda x: x["start"])
+        for i in range(len(cleaned) - 1):
+            end = cleaned[i]["start"] + cleaned[i]["duration"]
+            if end > cleaned[i + 1]["start"] + 1e-6:
+                raise ValueError("Lyrics timings overlap")
+        return cleaned
+
+    def handle_get_lyrics(self, folder: str, filename: str):
+        if not folder or not filename:
+            self._set_headers(400)
+            self.wfile.write(b"{\"error\":\"Missing folder or file\"}")
+            return
+
+        info = load_album_info(folder)
+        if not info:
+            self._set_headers(404)
+            self.wfile.write(b"{\"error\":\"Album not found\"}")
+            return
+
+        for track in info.get("tracks", []):
+            if track.get("file") == filename:
+                self._set_headers(200)
+                self.wfile.write(json.dumps({"lyrics": track.get("lyrics") or []}).encode("utf-8"))
+                return
+
+        self._set_headers(404)
+        self.wfile.write(b"{\"error\":\"Track not found\"}")
+
+    def handle_set_lyrics(self):
+        data = self._read_json()
+        folder = (data.get("folder") or "").strip()
+        filename = (data.get("file") or "").strip()
+        if not folder or not filename:
+            self._set_headers(400)
+            self.wfile.write(b"{\"error\":\"Missing folder or file\"}")
+            return
+
+        info = load_album_info(folder)
+        if not info:
+            self._set_headers(404)
+            self.wfile.write(b"{\"error\":\"Album not found\"}")
+            return
+
+        try:
+            lyrics = self._validate_lyrics(data.get("lyrics"))
+        except Exception as exc:
+            self._set_headers(400)
+            self.wfile.write(json.dumps({"error": str(exc)}).encode("utf-8"))
+            return
+
+        for track in info.get("tracks", []):
+            if track.get("file") == filename:
+                track["lyrics"] = lyrics
+                save_album_info(folder, info)
+                self._set_headers(200)
+                self.wfile.write(json.dumps({"ok": True}).encode("utf-8"))
+                return
+
+        self._set_headers(404)
+        self.wfile.write(b"{\"error\":\"Track not found\"}")
 
 def safe_filename(original: str, used: set) -> str:
     path = Path(original)

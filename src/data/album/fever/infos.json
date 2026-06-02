@@ -1,0 +1,19 @@
+{
+  "title": "Fever",
+  "artist": "Buckshot",
+  "cover": "IMG_3678.png",
+  "tracks": [
+    {
+      "title": "stream-buckshot-&-fakemink-fever-(prod-made-with-Voicemod",
+      "file": "stream-buckshot-fakemink-fever-prod-made-with-voicemod.mp3",
+      "duration": "0:41",
+      "lyrics": [
+        {
+          "text": "empty lyrics",
+          "start": 0,
+          "duration": 41
+        }
+      ]
+    }
+  ]
+}

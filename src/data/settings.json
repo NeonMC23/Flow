@@ -3,7 +3,7 @@
   "glassPlayer": true,
   "autoplayNext": true,
   "showOscilloscope": true,
-  "themePreset": "dark-pink",
+  "themePreset": "",
   "oscColor": "#ff66cc",
   "accent": "#ff66cc",
   "accent2": "#ff9ee2",
@@ -17,5 +17,5 @@
   "oscWidth": 100,
   "oscFftSize": 4096,
   "oscLineWidth": 1,
-  "updatedAt": 1775484599549
+  "updatedAt": 1779886889527
 }
