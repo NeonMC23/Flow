@@ -1,6 +1,6 @@
 # Flow
 
-![Flow — Logo](src/icon/logo.png)
+<img src="src/icon/logo.png" width="128" alt="Flow Logo">
 
 **Your music. Your library. Your flow.**
 
