@@ -1,6 +1,6 @@
-# <img src="src/icon/logo.png" width="128" alt="Flow Logo"> Flow
+# Flow
 
-
+ <img src="src/icon/logo.png" width="128" alt="Flow Logo">
 
 **Your music. Your library. Your flow.**
 
